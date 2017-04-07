@@ -39,9 +39,10 @@ afterEach(function() {
         let unlikeButton = element(by.id('unlikeButton'));
         let description = element(by.id('description'));
 
-        for(i=0; i<5; i++)
+        for(i=0; i<3; i++)
                  {
                     try{
+                        sleep();
                      rightArrowButton.click();
                      if(i%2 == 0)
                      {
@@ -70,7 +71,7 @@ afterEach(function() {
  * @param {number} time - The amount of time to sleep (in milliseconds)
  */
 function sleep(){
-    browser.driver.sleep(500);
+    browser.driver.sleep(1000);
 }
 
 /**

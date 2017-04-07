@@ -1,6 +1,7 @@
 from Error_Code import *
 from API_NAME import *
 import Utils
+from extras.Check_Invalid import *
 from models.User import User
 
 """
@@ -61,7 +62,7 @@ def check_required_valid(api, post, response, auth_required=False):
                                       missing_invalid_parameter)
         return False, None
 
-    invalid = Utils.key_validation(values)
+    invalid = key_validation(values)
 
     # if any of the keys is invalid then error is written to the response
     if len(invalid) > 0:

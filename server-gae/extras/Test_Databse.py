@@ -1,4 +1,4 @@
-from Utils import *
+from extras.Random_Models import *
 
 
 def get_user(name, email, password):

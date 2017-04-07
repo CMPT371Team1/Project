@@ -100,6 +100,9 @@ export class LoginService {
         return this.authToken;
     }
 
+    /**
+     * Sign the user out of the device
+     */
     public signOut(): void{
         LoginService.user = null;
         this.userId = null;

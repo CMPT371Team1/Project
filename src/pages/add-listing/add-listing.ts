@@ -1,11 +1,12 @@
 import {Logger} from "angular2-logger/core";
 let assert = require('assert-plus');
 import {Component} from '@angular/core';
-import {NavController, NavParams, ToastController} from 'ionic-angular';
+import {Loading, LoadingController, NavController, NavParams, ToastController} from 'ionic-angular';
 import {Camera} from 'ionic-native';
 import {Listing} from "../../app/models/listing";
 import {ListingProvider} from "../../app/providers/listing-provider";
 import {Province} from "../../app/models/province";
+import {KasperConfig} from "../../app/kasper-config";
 
 @Component({
     selector: 'page-add-listing',
@@ -38,7 +39,7 @@ export class AddListingPage {
 
     constructor(public navCtrl: NavController,
                 public listingProvider: ListingProvider,
-                public toastCtrl: ToastController,
+                public loadingCtrl: LoadingController,
                 public navParams: NavParams,
                 private _logger: Logger) {
         this._provinces = Province.asArray;
@@ -95,8 +96,8 @@ export class AddListingPage {
             // Pick image from library
             sourceType: 0,//Camera.PictureSourceType.PHOTOLIBRARY,
             // Dimensions to scale the image to
-            targetWidth: 1280, //make it const in kasper config
-            targetHeight: 720 //make it const in kasper config
+            targetWidth: KasperConfig.DESIRED_IMAGE_WIDTH, //make it const in kasper config
+            targetHeight: KasperConfig.DESIRED_IMAGE_HEIGHT //make it const in kasper config
         };
 
         Camera.getPicture(options).then((data) => {
@@ -151,13 +152,32 @@ export class AddListingPage {
      * Add a new listing to the server, or display an error if the server denies the requset.
      */
     addListing(){
+        let loading:Loading = this.loadingCtrl.create({
+            content: "Adding Listing..."
+        });
+        loading.present();
+
         let result = this.listingProvider.addListing(this.getCurListing());
 
         result.subscribe(data => {
             this.navCtrl.pop();
+            loading.dismiss();
         }, error => {
+            loading.dismiss();
             this.listingProvider.kasperService.handleError("createListing", error.json());
         });
+
+    }
+
+    /**
+     * Try to add a new listing to the server, the hook listing will give an invalid params error.
+     */
+    addHookListing(){
+        let error = {"invalidPrice": "Price was invalid", "invalidSqft" : "Invalid Square feet"};
+
+
+        this.listingProvider.kasperService.handleError("createListing", error);
+
 
     }
 
@@ -183,6 +203,7 @@ export class AddListingPage {
      * Update the listing on the server to be unpublished
      */
     unpublish(){
-        this._logger.error("AddListingPage.unpublish is not implemented yet");
+        this.isPublished = false;
+        this.saveListing();
     }
 }

@@ -6,6 +6,9 @@ from webapp2_extras.appengine.auth.models import User as Webapp2User
 
 
 class User(Webapp2User):
+    '''This User class contains the functions
+    and fields associated with a User.'''
+
     email = ndb.StringProperty(required=True)
     first_name = ndb.StringProperty(required=True)
     last_name = ndb.StringProperty(required=False)
@@ -20,6 +23,7 @@ class User(Webapp2User):
             The raw password which will be hashed and stored
         """
         self.password = security.generate_password_hash(raw_password)
+        self.put()
 
     # @classmethod
     # def build_key(cls, email):
@@ -54,7 +58,10 @@ class User(Webapp2User):
         self.phone2 = phone2
 
     def set_email(self, email):
+        if self.email in self.auth_ids:
+            self.auth_ids.remove(self.email)
         self.email = email
+        self.add_auth_id(self.email)
         self.verified = False
 
     def set_province(self, province):

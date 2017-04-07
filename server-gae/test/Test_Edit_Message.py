@@ -11,6 +11,8 @@ from web_apis.Create_User import *
 import extras.Utils as utils
 from models.Message import Message
 from API_NAME import *
+from extras.Check_Invalid import *
+from extras.Random_Models import *
 
 
 class TestEditMessage(unittest.TestCase):
@@ -103,6 +105,16 @@ class TestEditMessage(unittest.TestCase):
         self.assertEquals(response_status, missing_invalid_parameter)
         error_keys_received = get_keys_from_values(values)
         self.assertSetEqual(set(expected_errors), set(error_keys_received))
+
+    def test_unauthorized_editor(self):
+        self.user_seller = create_dummy_users_for_testing(Main, 1)[0]
+        testing_input = get_testing_input(self.user_seller["userId"],
+                                          self.user_seller["authToken"],
+                                          self.valid_message_id_1, 'r')
+        values, response_status = get_edit_message_api_response(testing_input)
+        self.assertEquals(response_status, unauthorized_access)
+        self.assertTrue(values.keys(), [not_authorized["error"]])
+
 
     def test_liked_listing(self):
         self.test_correct_input_read()

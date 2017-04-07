@@ -7,7 +7,7 @@
 </ion-header>
 
 <ion-content padding>
-    <img class="logo" src="http://placehold.it/300x300" />
+    <img class="logo" src="/assets/placeholder.png" />
 
     <form [formGroup]="loginForm">
         <ion-list inset>
@@ -22,7 +22,7 @@
 
             <ion-item>
                 <ion-label><ion-icon name="lock"></ion-icon></ion-label>
-                <ion-input formControlName="password" type="password" placeholder="Password" id="password"></ion-input>
+                <ion-input formControlName="password" type="password" placeholder="Password" clearOnEdit="false" id="password"></ion-input>
             </ion-item>
         </ion-list>
 

@@ -11,7 +11,9 @@ from models.Listing import Listing
 from web_apis.Create_User import *
 from API_NAME import *
 sys.path.append("../")
+from extras.Check_Invalid import *
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+from extras.Random_Models import *
 
 
 class TestDeleteListing(unittest.TestCase):
@@ -20,6 +22,8 @@ class TestDeleteListing(unittest.TestCase):
         test case 2: unauthorized listing
         test case 3: Test with invalid userId
         test case 4: success delivery
+        test case 5: invalid listingId
+        test case 6: the deleted listing should be deleted from Favourites
     """
     def setUp(self):
         setup_testbed(self)
@@ -87,6 +91,37 @@ class TestDeleteListing(unittest.TestCase):
 
         listing_changed = Listing.get_by_id(self.listingId)
         self.assertEquals(listing_changed, None)
+
+    def test_invalid_listing_id(self):
+        res_value, status = get_delete_response(
+            get_delete_post_dictionary(
+                self.deleterId, "invalid listingId", self.deleterToken))
+        self.assertEquals(status, invalid_listing_id['status'])
+        error_expected = Error_Code.invalid_listing_id['error']
+        self.assertTrue(error_expected in res_value)
+
+    def test_un_auth_listing_id(self):
+        res_value, status = get_delete_response(
+            get_delete_post_dictionary(
+                self.deleterId, self.listingId + 10, self.deleterToken))
+        self.assertEquals(status, unauthorized_access)
+        error_expected = [Error_Code.un_auth_listing["error"]]
+        self.assertTrue(are_two_lists_same(res_value.keys(), error_expected))
+
+    def test_delete_listing_from_favourites(self):
+        favourites = Favorite.Favorite.query(Favorite.Favorite.listingId == self.listingId).fetch()
+        assert len(favourites) == 1
+
+        res_value, status = get_delete_response(
+            get_delete_post_dictionary(
+                self.ownerId, self.listingId, self.ownerToken))
+        self.assertEquals(status, success)
+
+        listing_changed = Listing.get_by_id(self.listingId)
+        self.assertEquals(listing_changed, None)
+
+        favourites = Favorite.Favorite.query(Favorite.Favorite.listingId == self.listingId).fetch()
+        assert len(favourites) == 0
 
     def tearDown(self):
         self.testbed.deactivate()

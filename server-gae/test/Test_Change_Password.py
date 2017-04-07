@@ -1,13 +1,15 @@
 from __future__ import absolute_import
 import sys
 from extras.Error_Code import *
-sys.path.append("../")
+sys.path.append('../')
 import os
 import unittest
 import Main
 from API_NAME import *
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 from extras.Utils import *
+from extras.Check_Invalid import *
+from extras.Random_Models import *
 
 
 class TestChangePassword(unittest.TestCase):
@@ -32,7 +34,7 @@ class TestChangePassword(unittest.TestCase):
             get_create_user_api_response(self.database_user)
 
         self.user = response
-        self.assertTrue("userId" in self.user)
+        self.assertTrue('userId' in self.user)
         self.user_id = self.user['userId']
 
         # If this assert fails then create user unit tests should be run
@@ -40,17 +42,17 @@ class TestChangePassword(unittest.TestCase):
 
     def test_change_password(self):
         # Test Case: Success case
-        input = {"oldPassword": "aaAA1234",
-                  "newPassword": "newPass123",
-                  "confirmedPassword": "newPass123",
-                  "userId": self.user_id}
+        input = {'oldPassword': 'aaAA1234',
+                  'newPassword': 'newPass123',
+                  'confirmedPassword': 'newPass123',
+                  'userId': self.user_id}
 
         response, response_status = \
             get_response_from_post(Main, input, change_password_api)
 
         self.assertEquals(response_status, success)
 
-        self.assertTrue("authToken" in response)
+        self.assertTrue('authToken' in response)
 
         #Check to make sure old password no longer works
         input2 = {'email': 'student@usask.ca', 'password': 'aaAA1234'}
@@ -79,10 +81,10 @@ class TestChangePassword(unittest.TestCase):
 
     def test_incorrect_old_pass(self):
         # Case 2: Incorrect old password
-        input2 = {"oldPassword": "Wrongpassword123",
-                  "newPassword": "notImportant123",
-                  "confirmedPassword": "notImportant123",
-                  "userId": self.user_id}
+        input2 = {'oldPassword': 'Wrongpassword123',
+                  'newPassword': 'notImportant123',
+                  'confirmedPassword': 'notImportant123',
+                  'userId': self.user_id}
 
         response, response_status = get_change_password_api_response(input2)
         self.assertEquals(response_status, unauthorized_access)
@@ -91,10 +93,10 @@ class TestChangePassword(unittest.TestCase):
 
     def test_missmatched_passwords(self):
         # Case3: Passwords do not match
-        input3 = {"oldPassword": "aaAA1234",
-                  "newPassword": "NotMatching123",
-                  "confirmedPassword": "doesntMatch123",
-                  "userId": self.user_id}
+        input3 = {'oldPassword': 'aaAA1234',
+                  'newPassword': 'NotMatching123',
+                  'confirmedPassword': 'doesntMatch123',
+                  'userId': self.user_id}
         response, response_status = get_change_password_api_response(input3)
         self.assertEquals(response_status, unauthorized_access)
         self.assertTrue(are_two_lists_same([password_mismatch['error']],
@@ -102,10 +104,10 @@ class TestChangePassword(unittest.TestCase):
 
     def test_weak_passwords(self):
         # Case4: new passwords match but are not strong
-        input4 = {"oldPassword": "aaAA1234",
-                  "newPassword": "weakmatch",
-                  "confirmedPassword": "weakmatch",
-                  "userId": self.user_id}
+        input4 = {'oldPassword': 'aaAA1234',
+                  'newPassword': 'weakmatch',
+                  'confirmedPassword': 'weakmatch',
+                  'userId': self.user_id}
 
         response, response_status = get_change_password_api_response(input4)
 
@@ -114,16 +116,28 @@ class TestChangePassword(unittest.TestCase):
                                            response.keys()))
     def test_change_to_same_password(self):
         # Case5: new passwords and old password are the same
-        input4 = {"oldPassword": "aaAA1234",
-                  "newPassword": "aaAA1234",
-                  "confirmedPassword": "aaAA1234",
-                  "userId": self.user_id}
+        input4 = {'oldPassword': 'aaAA1234',
+                  'newPassword': 'aaAA1234',
+                  'confirmedPassword': 'aaAA1234',
+                  'userId': self.user_id}
 
         response, response_status = get_change_password_api_response(input4)
 
         self.assertEquals(response_status, processing_failed)
         self.assertTrue(are_two_lists_same(
             [new_password_is_the_same_as_old['error']], response.keys()))
+
+    def test_invalid_user_id(self):
+        input5 = {'oldPassword': 'aaAA1234',
+                  'newPassword': 'aaAA12344',
+                  'confirmedPassword': 'aaAA12344',
+                  'userId': self.user_id + 123}
+
+        response, response_status = get_change_password_api_response(input5)
+        self.assertEquals(response_status, unauthorized_access)
+        self.assertTrue(are_two_lists_same(
+            [not_authorized['error']], response.keys()))
+
 
     def tearDown(self):
         self.testbed.deactivate()

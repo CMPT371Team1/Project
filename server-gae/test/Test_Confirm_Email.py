@@ -1,16 +1,13 @@
 from __future__ import absolute_import
-import json
+from API_NAME import create_user_api
+from extras.Random_Models import *
 import os
 import sys
-sys.path.append("../")
 import unittest
-from extras.Error_Code import *
 import Main
-import webapp2
-from models.User import User
 from extras.Utils import *
+sys.path.append("../")
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-from API_NAME import create_user_api
 
 
 class TestConfirmEmail(unittest.TestCase):
@@ -36,6 +33,7 @@ class TestConfirmEmail(unittest.TestCase):
         user_saved = User.get_by_id(int(response_body["userId"]))
 
         messages = self.mail_stub.get_sent_messages(to=user_saved.email)
+
         self.assertEqual(1, len(messages))
         self.assertEqual(user_saved.email, messages[0].to)
 

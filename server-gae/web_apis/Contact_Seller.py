@@ -4,9 +4,8 @@ from models.User import User
 import sys
 from API_NAME import contact_seller_api
 from extras.Required_Fields import check_required_valid
-
 from models.Message import Message
-
+from extras.Check_Invalid import *
 sys.path.append("../")
 from extras.Base_Handler import BaseHandler
 
@@ -33,7 +32,7 @@ class ContactSeller(BaseHandler):
 
         if not valid:
             return
-
+        assert values['senderId'] is not None
         # find the correct sender with senderId
         sender = User.get_by_id(int(values['senderId']))
 

@@ -135,6 +135,9 @@ export class ListingProvider {
         return this.kasperService.getMyListings();
     }
 
+
+
+
     /**
      * Get the full information about a listing
      *

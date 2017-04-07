@@ -1,14 +1,16 @@
 #!/bin/bash
 
-# Author: Chris Mykota-Reid 
+# Author: Chris Mykota-Reid
 # A helper script to allow all smoke tests to run even if one fails
 # while still having the build fail if any fail.  Also calls the script
 # that updates the server after a successful build and refreshes the TestDB
 # with an empty post to the TestDB init URL.
 
 echo $'\n\n\n\n*******RUNNING BACK-END SMOKE TESTS*******'
-python -m unittest discover -s server-gae/ -p 'Test*.py'
+cd server-gae/test/
+python Run_All_Test.py
 export BACK_END_TEST=$?
+cd ../..
 
 # if the back end tests succeeded we want to update the server before we run the front end tests
 if [[ "${BACK_END_TEST}" == 0 ]]; then

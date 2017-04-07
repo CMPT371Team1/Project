@@ -9,7 +9,7 @@
 <ion-content>
     <ion-list>
         <ion-item no-lines color="danger" text-wrap *ngIf="!loginService.isLoggedIn()">
-            You must be signed in to add listings!
+            You must be signed in to view your favourites!
         </ion-item>
         <ion-item-sliding *ngFor="let cur of listings">
             <ion-item (click)="selectListing(cur)">

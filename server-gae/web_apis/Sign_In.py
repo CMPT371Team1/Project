@@ -1,6 +1,7 @@
 import logging
 
 from extras.Utils import *
+from extras.Check_Invalid import *
 import sys
 sys.path.append('../')
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
@@ -23,13 +24,6 @@ class SignIn(BaseHandler):
         @return-api: A valid Token, with all the user details is returned in
                      response.
     """
-
-    def options(self, *args, **kwargs):
-        setup_api_options(self)
-
-    def get(self):
-        self._serve_page()
-
     def post(self):
         setup_post(self.response)
         valid, values = \
@@ -42,7 +36,8 @@ class SignIn(BaseHandler):
         try:
             # sign in and return user information.
             user = self.auth.get_user_by_password(
-                (values['email']).lower(), values['password'], remember=True, save_session=True)
+                (values['email']).lower(), values['password'], remember=True,
+                save_session=True)
 
             user_dict = {'authToken': user['token'],
                          'userId': user['user_id'],

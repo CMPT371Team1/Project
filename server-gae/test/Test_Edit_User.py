@@ -9,6 +9,8 @@ from extras.Utils import *
 from models.User import User
 import Main
 from API_NAME import *
+from extras.Check_Invalid import *
+from extras.Random_Models import *
 
 class TestEditUser(unittest.TestCase):
     """
@@ -84,6 +86,7 @@ class TestEditUser(unittest.TestCase):
 
         res_value, status = get_edit_message_response(
             get_post_dictionary(user_id, token, change_values))
+
         self.assertEqual(status, success)
 
         new_user = User.get_by_id(int(self.users[0]["userId"]))
@@ -113,6 +116,45 @@ class TestEditUser(unittest.TestCase):
         new_user = User.get_by_id(int(self.users[2]["userId"]))
         self.assertEqual(new_user.phone1, change_values["phone1"])
         self.assertEqual(new_user.last_name, change_values["lastName"])
+
+    def test_invalid_key(self):
+        user_id = self.users[1]["userId"]
+        token = self.users[1]["authToken"]
+        change_values = {"phone1": "123", "firstName": "Hello"}
+        res_value, status = get_edit_message_response(
+            get_post_dictionary(user_id, token, change_values))
+        self.assertEqual(status, missing_invalid_parameter)
+        self.assertTrue(res_value.keys(), [invalid_phone1["status"]])
+
+    def test_change_email(self):
+        user_id = self.users[1]["userId"]
+        token = self.users[1]["authToken"]
+        change_values = {"email": "something@else.com"}
+        res_value, status = get_edit_message_response(
+            get_post_dictionary(user_id, token, change_values))
+        self.assertEqual(status, success)
+        res_value, status = get_response_from_post(
+            Main,
+            {
+                "email": change_values["email"],
+                "password": self.users[1]["password"]
+            },
+            sign_in_api
+        )
+
+        self.assertEqual(status, success)
+
+        res_value, status = get_response_from_post(
+            Main,
+            {
+                "email": self.users[1]["email"],
+                "password": self.users[1]["password"]
+            },
+            sign_in_api
+        )
+
+        self.assertEqual(status, unauthorized_access)
+
 
     def tearDown(self):
         # Don't forget to deactivate the testbed after the tests are

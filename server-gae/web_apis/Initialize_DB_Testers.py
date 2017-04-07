@@ -1,6 +1,7 @@
 from google.appengine.api import mail
 from extras.Base_Handler import BaseHandler
 from extras.Utils import *
+from extras.Check_Invalid import *
 from models.FacebookUser import FacebookUser
 from models.Favorite import Favorite
 from models.Listing import Listing
@@ -27,8 +28,6 @@ class InitializeDB(BaseHandler):
     def options(self, *args, **kwargs):
         setup_api_options(self)
 
-    def get(self):
-        pass
 
     def post(self):
         models_list = [FacebookUser, Favorite, Listing, Message, User,

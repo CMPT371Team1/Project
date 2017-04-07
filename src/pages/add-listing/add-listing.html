@@ -1,9 +1,9 @@
 <ion-header>
     <ion-navbar color="primary">
-        <ion-title *ngIf="curListing == null">
+        <ion-title *ngIf="!editMode">
             Add Listing
         </ion-title>
-        <ion-title *ngIf="curListing != null">
+        <ion-title *ngIf="editMode">
             Edit Listing
         </ion-title>
     </ion-navbar>
@@ -64,8 +64,8 @@
 
 
         <ion-item>
-            <button ion-button block (click)="saveWithoutPublishing()" id="alSave">Save without Publishing</button>
-            <button *ngIf="curListing == null || ((curListing != null) && !curListing.isPublished)" ion-button block (click)="saveAndPublish()" id="alPublish">Publish</button>
+            <button ion-button item-left="" (click)="saveWithoutPublishing()" id="alSave">Save without Publishing</button>
+            <button *ngIf="curListing == null || ((curListing != null) && !curListing.isPublished)" ion-button item-right (click)="saveAndPublish()" id="alPublish">Publish</button>
             <button *ngIf="(curListing != null) && curListing.isPublished" ion-button block (click)="unpublish()" id="alUnpublish">Unpublish</button>
         </ion-item>
     </ion-list>

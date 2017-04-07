@@ -2,9 +2,8 @@ import sys
 sys.path.append('../')
 import logging
 from extras.Base_Handler import BaseHandler
-from models.User import *
 from webapp2_extras.auth import InvalidAuthIdError, InvalidPasswordError
-from extras.Utils import *
+from extras.Check_Invalid import *
 from API_NAME import *
 from extras.Required_Fields import check_required_valid
 
@@ -17,7 +16,7 @@ class ChangePassword(BaseHandler):
 
         @post-cond: On success, a user's password is changed in the database.
 
-        @:return:   A new token if success with code 200, otherwise,
+        @:return:   A new token and code 200 on success, otherwise,
                     an appropriate error message and code.
 
     """
@@ -34,6 +33,17 @@ class ChangePassword(BaseHandler):
             return
 
         user = User.get_by_id(int(values['userId']))
+        if user is None:
+            error = {
+                not_authorized['error']: 'Invalid credentials'
+            }
+            write_error_to_response(self.response, error,
+                                    not_authorized['status'])
+            logging.info(
+                'Sign-in-with-token failed for user %s because of %s',
+                int(values['userId']))
+            return
+
         try:
             # attempt to get the current user by the old password. Will throw an
             # exception if the password or e-mail are unrecognized.
@@ -44,22 +54,12 @@ class ChangePassword(BaseHandler):
             logging.info('Sign-in failed for user %s because of %s',
                          values['userId'], type(e))
             error = {
-                not_authorized['error']: "Invalid credentials"
+                not_authorized['error']: 'Invalid credentials'
             }
             write_error_to_response(self.response, error,
                                     not_authorized['status'])
             return
 
-        if user is None:
-            error = {
-                not_authorized['error']: "Invalid credentials"
-            }
-            write_error_to_response(self.response, error,
-                                    not_authorized['status'])
-            logging.info(
-                'Sign-in-with-token failed for user %s because of %s',
-                int(values['userId']))
-            return
 
         # Get a new token
         token = user_dict['token']
@@ -68,7 +68,7 @@ class ChangePassword(BaseHandler):
 
         if not is_valid_password(values['newPassword']):
             error = {
-                password_not_strong['error']: "Password not strong enough"
+                password_not_strong['error']: 'Password not strong enough'
             }
             write_error_to_response(self.response, error,
                                     password_not_strong['status'])
@@ -77,7 +77,7 @@ class ChangePassword(BaseHandler):
         if values['newPassword'] != values['confirmedPassword']:
             error = {
                 password_mismatch['error']:
-                    "Password and confirmed password do not match"
+                    'Password and confirmed password do not match'
             }
             write_error_to_response(self.response, error,
                                     password_mismatch['status'])
@@ -86,7 +86,7 @@ class ChangePassword(BaseHandler):
         if values['newPassword'] == values['oldPassword']:
             error = {
                 new_password_is_the_same_as_old['error']:
-                    "New password is same as the old password"
+                    'New password is same as the old password'
             }
             write_error_to_response(self.response, error,
                                     new_password_is_the_same_as_old['status'])
@@ -94,16 +94,6 @@ class ChangePassword(BaseHandler):
 
         User.set_password(user, values['newPassword'])
 
-        try:
-            # This will throw an exception if the password is wrong, which will
-            # only happen if set_password failed.
-            user_dict = self.auth.get_user_by_password(
-                user.email, values['newPassword'], remember=True,
-                save_session=True)
-        except (InvalidAuthIdError, InvalidPasswordError) as e:
-            # set_password failed. This should never happen
-            assert False
-        # self.auth.store.delete_auth_token(user['userId'], user['token'])
         user_dict = {'authToken': token}
 
         write_success_to_response(self.response,user_dict)

@@ -9,11 +9,14 @@
 </ion-header>
 
 <ion-content>
+    <ion-item class="ohno" no-lines text-wrap *ngIf="listings.length == 0">
+        <div class="image" [ngStyle]="{ 'background-image': 'url(assets/no-more-listings.png)'}"></div> <!-- dylan.wordart -->
+    </ion-item>
     <ion-list>
         <ion-item-sliding *ngFor="let curListing of listings; let i=index" (ionDrag)="onDrag($event, i)">
             <ion-item *ngIf="curListing != null">
                 <ion-label>
-                    <ion-img src="{{ curListing.images[0] }}" id="image" (click)="goToDetails(i)"></ion-img>
+                    <div [ngStyle]="{ 'background-image': 'url(data:image/gif;base64,' + curListing.images[0] + ')'}" class="image" id="image" (click)="goToDetails(i)"></div>
                     <span class="description">
                         <p class="price">{{ curListing.price | currency:'USD':true:'1.2-2' }}</p>
                     </span>

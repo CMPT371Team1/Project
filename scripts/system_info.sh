@@ -14,17 +14,19 @@ if [[ "${TRAVIS_OS_NAME}" == "android" ]]; then
   echo 'Android Support Repository, revision 42'
 fi
   
-java -version
-echo 'npm version:'
-npm -v
-firefox --version
-#google-chrome --version
-echo "Protractor version:"
-protractor --version
-echo "Jasmine version:"
-npm view jasmine version
-echo "Gulp version:"
-npm view gulp version
-ionic info
-ssh -V
-sshpass -V
+if [[ "${BUILD_TYPE}" == "test" || ( "${BUILD_TYPE}" == "deployment" && "${TRAVIS_OS_NAME}" == "android" ) ]]; then  
+  java -version
+  echo 'npm version:'
+  npm -v
+  firefox --version
+  #google-chrome --version
+  echo "Protractor version:"
+  protractor --version
+  echo "Jasmine version:"
+  npm view jasmine version
+  echo "Gulp version:"
+  npm view gulp version
+  ionic info
+  ssh -V
+  sshpass -V
+fi

@@ -10,6 +10,8 @@ import Main
 from web_apis.Create_User import *
 from extras.Utils import get_response_from_post
 from API_NAME import sign_out_api, sign_in_token_api
+from extras.Check_Invalid import *
+from extras.Random_Models import *
 
 
 class TestSignOut(unittest.TestCase):
@@ -24,6 +26,14 @@ class TestSignOut(unittest.TestCase):
     def test_sign_out_incorrect_input(self):
         sign_in_user_input = get_post_dictionary(self.users[0]["userId"],
                                                  "invalidToken")
+
+        response, response_status = get_sign_out_response(sign_in_user_input)
+
+        self.assertEqual(response_status, unauthorized_access)
+
+    def test_sign_out_incorrect_user_id(self):
+        sign_in_user_input = get_post_dictionary( 111333311,
+            self.users[0]["authToken"])
 
         response, response_status = get_sign_out_response(sign_in_user_input)
         self.assertEqual(response_status, unauthorized_access)

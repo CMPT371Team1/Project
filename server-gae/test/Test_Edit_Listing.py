@@ -9,9 +9,11 @@ import extras.Error_Code as Error_Code
 from models.Listing import Listing
 from web_apis.Create_User import *
 from API_NAME import *
+from extras.Check_Invalid import *
 
 sys.path.append("../")
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+from extras.Random_Models import *
 
 
 class TestEditListing(unittest.TestCase):
@@ -24,6 +26,9 @@ class TestEditListing(unittest.TestCase):
         test case 6: unauthorized userId and listingId
         test case 7: input with invalid fields
         test case 8: correct input
+        test case 9: edit a listing that's not published
+        test case 10: publish a listing with missing fields
+        test case 11: change fields to empty when listing is published
 
     """
     def setUp(self):
@@ -52,6 +57,13 @@ class TestEditListing(unittest.TestCase):
         editors = users[0]
         self.editorId = editors['userId']
         self.editorToken = editors['authToken']
+
+        empty_unpublished_listing = {"userId": self.ownerId, "authToken": self.token, "isPublished": 'False'}
+        request = webapp2.Request.blank('/createListing',
+                                        POST=empty_unpublished_listing)
+        response = request.get_response(Main.app)
+        output = json.loads(response.body)
+        self.empty_fields_listing_id = output["listingId"]
 
     def test_missing_input(self):
         res_value, status = get_response(get_post_dictionary("", "", "", {}))
@@ -85,7 +97,7 @@ class TestEditListing(unittest.TestCase):
         self.assertEquals(are_two_lists_same(res_value, errors_expected), True)
 
     def test_unrecognized_key(self):
-        change_values = { "unrecognizedKey": "unrecognizedKey"}
+        change_values = {"unrecognizedKey": "unrecognizedKey"}
 
         res_value, status = get_response(
             get_post_dictionary(self.ownerId, self.listingId,
@@ -116,25 +128,25 @@ class TestEditListing(unittest.TestCase):
                            Error_Code.invalid_listing_id['error']]
         self.assertEquals(are_two_lists_same(res_value, errors_expected), True)
 
-    def test_unauthorized_userid_listing_id(self):
+    def test_unauthorized_user_id(self):
         change_values = {"bathrooms": 10}
         res_value, status = get_response(
-            get_post_dictionary(1111111, 4444444, self.token, change_values))
+            get_post_dictionary(1111111, self.listingId, self.token, change_values))
 
         self.assertEquals(status, not_authorized['status'])
         error_expected = Error_Code.not_authorized['error']
         self.assertTrue(error_expected in res_value)
 
-    def test_invalid_fields(self):
-        change_values = { "bedrooms": "supposed to be a number",
-                          "squareFeet": "supposed to be a number",
-                          "bathrooms": "supposed to be a number",
-                          "price": "supposed to be a number",
-                          "isPublished": "supposed to be a boolean",
-                          "city": "Regina",
-                          "address": "312 Summer Place",
-                          "thumbnailImageIndex": "supposed to be a number"
-                          }
+    def test_invalid_change_values_field(self):
+        change_values = {"bedrooms": "supposed to be a number",
+                         "squareFeet": "supposed to be a number",
+                         "bathrooms": "supposed to be a number",
+                         "price": "supposed to be a number",
+                         "isPublished": "supposed to be a boolean",
+                         "city": "Regina",
+                         "address": "312 Summer Place",
+                         "thumbnailImageIndex": "supposed to be a number"
+                         }
 
         res_value, status = get_response(
             get_post_dictionary(self.ownerId, self.listingId, self.token,
@@ -189,32 +201,10 @@ class TestEditListing(unittest.TestCase):
         self.assertEquals(str(listing_changed.isPublished),
                           change_values['isPublished'])
 
-    def test_publish_unpublished_input_with_missing_fields(self):
-        listing_info = create_random_listing(self.ownerId, self.token)
-        listing_info['isPublished'] = 'False'
-        del listing_info['description']
-        del listing_info['bedrooms']
-        del listing_info['bathrooms']
-        del listing_info['thumbnailImageIndex']
-        del listing_info['images']
-        del listing_info['address']
-        del listing_info['squareFeet']
-        del listing_info['price']
-        del listing_info['longitude']
-        del listing_info['latitude']
-        del listing_info['postalCode']
-        del listing_info['city']
-        del listing_info['province']
-
-        request = webapp2.Request.blank('/createListing',
-                                        POST=listing_info)
-        response = request.get_response(Main.app)
-        output = json.loads(response.body)
-        listingId2 = output["listingId"]
-
+    def test_publish_with_missing_fields(self):
         change_values = {"isPublished": "True"}
         res_value, status = get_response(
-            get_post_dictionary(self.ownerId, listingId2, self.token,
+            get_post_dictionary(self.ownerId, self.empty_fields_listing_id, self.token,
                                 change_values))
 
         self.assertEquals(status, missing_invalid_parameter)
@@ -236,10 +226,37 @@ class TestEditListing(unittest.TestCase):
         # checking if there is a difference between error_keys and what we got
         self.assertEquals(are_two_lists_same(res_value, errors_expected), True)
 
+    def test_change_field_to_empty_when_listing_is_published(self):
+        published_listing = create_random_listing(self.ownerId, self.token)
+        published_listing["isPublished"] = "True"
+        request = webapp2.Request.blank('/createListing',
+                                        POST=published_listing)
+        response = request.get_response(Main.app)
+        output = json.loads(response.body)
+        published_listing_id = output["listingId"]
+        change_values = {"description": " "}
+        res_value, status = get_response(
+            get_post_dictionary(self.ownerId, published_listing_id, self.token, change_values))
+
+        self.assertEquals(status, missing_invalid_parameter)
+
+        errors_expected = [Error_Code.missing_description['error']]
+        self.assertEquals(are_two_lists_same(res_value, errors_expected), True)
+
+    def test_un_auth_listing(self):
+        change_values = {"bedrooms": "4",
+                         "squareFeet": "1500"
+                         }
+
+        res_value, status = get_response(
+            get_post_dictionary(self.ownerId, self.listingId + 10, self.token,
+                                change_values))
+        self.assertEquals(status, unauthorized_access)
+        error_expected = [Error_Code.un_auth_listing["error"]]
+        self.assertTrue(are_two_lists_same(res_value.keys(), error_expected))
+
+
     def tearDown(self):
-        # Don't forget to deactivate the testbed after the tests are
-        # completed. If the testbed is not deactivated, the original
-        # stubs will not be restored.
         self.testbed.deactivate()
 
 

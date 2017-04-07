@@ -7,6 +7,8 @@ import Main
 from web_apis.Create_User import *
 from extras.Utils import get_response_from_post
 from API_NAME import *
+from extras.Check_Invalid import *
+from extras.Random_Models import *
 
 
 class TestGetListings(unittest.TestCase):
@@ -19,6 +21,7 @@ class TestGetListings(unittest.TestCase):
         test case 6: get get listings with listingIdList
         test case 7: get listings with filter and userid
         test case 8: invalid key in valuesRequired
+        test case 9: negative filter value input
 
     """
 
@@ -73,7 +76,8 @@ class TestGetListings(unittest.TestCase):
     def test_empty_filter(self):
         get_filter_listings = {
             "valuesRequired": "",
-            "filter": ""
+            "filter": "",
+            "maxLimit": 5
         }
 
         res_value, status = get_listing_response(get_filter_listings)
@@ -160,7 +164,6 @@ class TestGetListings(unittest.TestCase):
         self.assertEquals(len(res_value), 7)
 
     def test_get_listing_with_filter(self):
-
         get_filter_listings = {
             "valuesRequired": json.dumps(["bedrooms", "bathrooms", "address", "price"]),
             "maxLimit": 8,
@@ -179,6 +182,11 @@ class TestGetListings(unittest.TestCase):
                     "lower": 1.0,
                     "upper": 200
                 },
+                "squareFeet":
+                    {
+                        "lower": 10,
+                        "upper": 200
+                    },
                 "province": "Saskatchewan"
             })
         }
@@ -219,6 +227,85 @@ class TestGetListings(unittest.TestCase):
         error_expected = invalid_values_required['error']
 
         self.assertTrue(error_expected in res_value)
+
+    def test_negative_numeric_fields_in_filter(self):
+        get_filter_listings = {
+            "valuesRequired": json.dumps(["bedrooms", "bathrooms", "address", "price"]),
+            "maxLimit": 8,
+            "userId": self.userId,
+            "authToken": self.token,
+            "filter": json.dumps({
+                "price": {
+                    "lower": -100,
+                    "upper": -8000000
+                },
+                "bedrooms": {
+                    "lower": -1,
+                    "upper": -1000
+                },
+                "bathrooms": {
+                    "lower": -1.0,
+                    "upper": -200
+                },
+                "province": "Saskatchewan"
+            })
+        }
+        res_value, status = get_listing_response(get_filter_listings)
+        self.assertEqual(status, missing_invalid_parameter)
+        error_expected = invalid_filter_bound['error']
+
+        self.assertTrue(error_expected in res_value)
+
+    def test_with_filer_listing_id(self):
+        get_filter_listings = {
+            "valuesRequired": "",
+            "filter": "",
+            "listingIdList": [1, 2]
+        }
+
+        res_value, status = get_listing_response(get_filter_listings)
+        self.assertEqual(status, missing_invalid_parameter)
+        self.assertTrue(are_two_lists_same(res_value.keys(),
+                                           [invalid_xor_condition["error"]]))
+
+    def test_with_invalid_user_id(self):
+        get_filter_listings = {
+            "valuesRequired": "",
+            "filter": "",
+            "userId": 1000,
+            "authToken": self.token
+        }
+        res_value, status = get_listing_response(get_filter_listings)
+        self.assertEqual(status, unauthorized_access)
+        self.assertTrue(are_two_lists_same(res_value.keys(),
+                                           [not_authorized["error"]]))
+
+    def test_with_invalid_token(self):
+        get_filter_listings = {
+            "valuesRequired": "",
+            "filter": "",
+            "userId": self.userId,
+            "authToken": "invalidToken"
+        }
+
+        res_value, status = get_listing_response(get_filter_listings)
+        self.assertEqual(status, unauthorized_access)
+        self.assertTrue(are_two_lists_same(res_value.keys(),
+                                           [not_authorized["error"]]))
+
+    def test_with_missing_token(self):
+        get_filter_listings = {
+            "valuesRequired": "",
+            "filter": "",
+            "userId": self.userId
+        }
+
+        res_value, status = get_listing_response(get_filter_listings)
+        self.assertEqual(status, unauthorized_access)
+        self.assertTrue(are_two_lists_same(res_value.keys(),
+                                           [missing_token["error"]]))
+
+
 
 
 def get_like_post_dictionary(user_id, listing_id, token, liked):

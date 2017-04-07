@@ -1,6 +1,6 @@
 import {ListingProvider} from "../../app/providers/listing-provider";
 import {Component, ViewChild} from "@angular/core";
-import {NavController, ModalController, NavParams, Slides} from "ionic-angular";
+import {NavController, ModalController, NavParams, Slides, ToastController} from "ionic-angular";
 import {Listing} from "../../app/models/listing";
 import {Logger} from "angular2-logger/core";
 import {LoginService} from "../../app/providers/login-service";
@@ -20,6 +20,7 @@ export class DetailPage {
 
     constructor(public navCtrl: NavController,
                 public modalCtrl: ModalController,
+                public toastCtrl: ToastController,
                 public listingProvider: ListingProvider,
                 public loginService: LoginService,
                 private _logger: Logger,
@@ -32,6 +33,11 @@ export class DetailPage {
      * Add the house to the users dislike list
      */
     dislike(): void{
+        this.toastCtrl.create({
+            message: "Disliked the selected listing.",
+            duration: 3000,
+            position: 'top'
+        }).present();
         this.listingProvider.dislikeListing(this.data[this.cursor].listingId).subscribe(data => {
             this._logger.debug("Dislike was successful.");
         }, error => {
@@ -40,9 +46,32 @@ export class DetailPage {
     }
 
     /**
+     * dislike test hook attempt to dislike a house get invalid userid error
+     */
+    dislikeHook(): void{
+        let error = {"invalidUserId" : "invalid user id"};
+
+        this.listingProvider.kasperService.handleError("likeDislikeListing", error);
+    }
+
+    /**
+     * like test hook attempt to dislike a house get invalid userid error
+     */
+    likeHook(): void {
+        let error = {"invalidUserId": "invalid user id"};
+
+        this.listingProvider.kasperService.handleError("likeDislikeListing", error);
+    }
+
+    /**
      * Add the house to the users favourites list
      */
     like(): void{
+        this.toastCtrl.create({
+            message: "Liked the selected listing.",
+            duration: 3000,
+            position: 'top'
+        }).present();
         this.listingProvider.likeListing(this.data[this.cursor].listingId).subscribe(data => {
             this._logger.debug("Like was successful.");
         }, error => {

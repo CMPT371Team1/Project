@@ -10,6 +10,8 @@ import webapp2
 from models.User import *
 from extras.Utils import *
 from API_NAME import *
+from extras.Check_Invalid import *
+from extras.Random_Models import *
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
@@ -75,6 +77,11 @@ class TestSignInWithToken(unittest.TestCase):
         # Check output
         self.assertNotEqual(output['authToken'], self.token)
         check_output_for_sign_in(self,output,self.database_user)
+
+        #check to make sure the old token doesn't work
+        output, response_status = get_sign_in_token_response(input3)
+        self.assertEquals(response_status,unauthorized_access)
+
 
     def tearDown(self):
         self.testbed.deactivate()

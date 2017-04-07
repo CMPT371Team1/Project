@@ -9,15 +9,11 @@ class BaseHandler(webapp2.RequestHandler):
     """
     contains business logic sign up and authentication users.
     Also contains some utility functions that are used by all handler class.
-    functions: Description
-    options: set up the headers from different controls over IP
-    auth: returns the auth instance of the user
-
     """
     def options(self):
         """
         options: set up the headers from different controls over IP
-        :return:
+        :return: nothing
         """
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         self.response.headers['Access-Control-Allow-Headers'] = \
@@ -77,7 +73,7 @@ class BaseHandler(webapp2.RequestHandler):
 
     def render_template(self, view_filename, params=None):
         """
-
+        Get the template web page based on the file name
         :param view_filename: html file that needs to be displayed on browser.
         :param params: Any arguments required by the page if any.
         :return: Nothing
@@ -110,7 +106,6 @@ class BaseHandler(webapp2.RequestHandler):
         """
 
         self.session_store = sessions.get_store(request=self.request)
-
         try:
             # Dispatch the request
             webapp2.RequestHandler.dispatch(self)

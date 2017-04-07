@@ -1,5 +1,6 @@
 import sys
 from extras.Utils import *
+from extras.Check_Invalid import *
 from models.Listing import Listing
 from models.User import User
 from API_NAME import get_messages_api
@@ -29,6 +30,7 @@ class GetMyListing(webapp2.RequestHandler):
         if not valid:
             return
 
+        assert values['userId'] is not None
         owner_id = int(values['userId'])
 
         my_listings = Listing.query(Listing.userId == owner_id).fetch()

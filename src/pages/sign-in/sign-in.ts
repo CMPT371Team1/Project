@@ -100,6 +100,9 @@ export class SignInPage {
         this.loading.dismiss();
     }
 
+    /**
+     * Mark the email field as attempted so errors will show up if it is invalid
+     */
     attemptEmail(){
         this.emailAttempted = true;
     }

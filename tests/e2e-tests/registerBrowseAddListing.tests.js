@@ -40,7 +40,7 @@ describe('Registering new user as a user would', function() {
         email.sendKeys().clear();
         password.sendKeys().clear();
         confirmPassword.sendKeys().clear();
-        email.sendKeys('testEmail@email.ca');
+        email.sendKeys('chrismIsTheBest@email.ca');
         password.sendKeys('weakpassword');
         confirmPassword.sendKeys('weakpassword');
          nextButton.click();

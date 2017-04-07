@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Authress: Chris Mykota-Reid :[
+# Authress: Chris Mykota-Reid 
 # Does things not related to installing files but still needed to be setup 
 # before running the build.   
 

@@ -7,8 +7,7 @@
 </ion-header>
 
 <ion-content>
-    <ion-slides>
-        <ion-slide padding [formGroup]="signUpStep1">
+        <div padding [formGroup]="signUpStep1" *ngIf="step == 1">
             <ion-item>
                 <ion-label stacked>Email</ion-label>
                 <ion-input type="text" formControlName="email" (blur)="attemptEmail()" placeholder="Enter your email here" id="signUpEmail"></ion-input>
@@ -20,7 +19,7 @@
 
             <ion-item>
                 <ion-label stacked>Password</ion-label>
-                <ion-input type="password" (blur)="attemptPassword()" formControlName="password" placeholder="Enter your password here" id="signUpPassword"></ion-input>
+                <ion-input type="password" (blur)="attemptPassword()" formControlName="password" clearOnEdit="false" placeholder="Enter your password here" id="signUpPassword"></ion-input>
             </ion-item>
 
             <ion-item no-lines class="invalid"  *ngIf="passwordAttempted && !signUpStep1.controls.password.valid">
@@ -29,15 +28,15 @@
 
             <ion-item>
                 <ion-label stacked>Confirm Password</ion-label>
-                <ion-input type="password" (focus)="attemptConfirmPassword()" formControlName="confirmPassword" placeholder="Enter your password again" id="signUpConfirmPassword"></ion-input>
+                <ion-input type="password" (focus)="attemptConfirmPassword()" formControlName="confirmPassword" clearOnEdit="false" placeholder="Enter your password again" id="signUpConfirmPassword"></ion-input>
             </ion-item>
 
             <ion-item no-lines class="invalid"  *ngIf="confirmPasswordAttempted && (signUpStep1.value.password != signUpStep1.value.confirmPassword)">
                 Passwords do not match
             </ion-item>
-        </ion-slide>
+        </div>
 
-        <ion-slide padding [formGroup]="signUpStep2">
+        <div padding [formGroup]="signUpStep2" *ngIf="step == 2">
             <ion-item>
                 <ion-label stacked>First Name</ion-label>
                 <ion-input type="text" (blur)="attemptFirstName()" formControlName="firstName" placeholder="Enter your first name here" id="signUpFirstName"></ion-input>
@@ -60,9 +59,9 @@
             <ion-item no-lines class="invalid" *ngIf="!signUpStep2.controls.phoneNumber.valid">
                 Invalid phone number
             </ion-item>
-        </ion-slide>
+        </div>
 
-        <ion-slide padding [formGroup]="signUpStep3">
+        <div padding [formGroup]="signUpStep3" *ngIf="step == 3">
             <ion-item>
                 <ion-label stacked>Province</ion-label>
                 <ion-select formControlName="province" id="signUpProvinceSelect">
@@ -78,14 +77,13 @@
                 <ion-label stacked>City</ion-label>
                 <ion-input formControlName="city" type="text" placeholder="City" id="signUpCity"></ion-input>
             </ion-item>
-        </ion-slide>
-    </ion-slides>
+        </div>
 </ion-content>
 
 <ion-footer>
     <ion-item no-lines>
-        <button *ngIf="slides.getActiveIndex() > 0" item-left ion-button (click)="previousStep()">Back</button>
-        <button *ngIf="slides.getActiveIndex() < 2" item-right ion-button (click)="nextStep()">Next</button>
-        <button *ngIf="slides.getActiveIndex() == 2" item-right ion-button (click)="doRegister()" id="signUpRegister">Finish</button>
+        <button *ngIf="step > 1" item-left ion-button (click)="previousStep()">Back</button>
+        <button *ngIf="step < 3" item-right ion-button (click)="nextStep()">Next</button>
+        <button *ngIf="step == 3" item-right ion-button (click)="doRegister()" id="signUpRegister">Finish</button>
     </ion-item>
 </ion-footer>

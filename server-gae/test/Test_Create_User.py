@@ -7,7 +7,9 @@ import Main
 from models.FacebookUser import FacebookUser
 from extras.Utils import *
 from API_NAME import create_user_api
+from extras.Check_Invalid import *
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+from extras.Random_Models import *
 
 
 class TestCreateUser(unittest.TestCase):
@@ -140,6 +142,18 @@ class TestCreateUser(unittest.TestCase):
 
         self.assertEquals(fb_e.user_id,int(response_body["userId"]))
         self.assertEquals(fb_e.fb_id, int(fb_user["fbId"]))
+
+    def test_success_without_optional(self):
+        user_input = create_random_user()
+        if "phone2" in user_input:
+            del user_input["phone2"]
+        response_body, status_int = get_create_user_api_response(user_input)
+        self.assertEquals(status_int, success)
+        self.assertTrue("authToken" in response_body)
+        self.assertTrue("userId" in response_body)
+        user_saved = User.get_by_id(int(response_body["userId"]))
+
+        self.assertTrue(user_saved.compare_with_dictionary(user_input))
 
     def tearDown(self):
         self.testbed.deactivate()

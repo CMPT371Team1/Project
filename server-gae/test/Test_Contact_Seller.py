@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import os
 import sys
-
+from extras.Check_Invalid import *
 sys.path.append("../")
 import unittest
 from API_NAME import contact_seller_api
@@ -10,6 +10,7 @@ from API_NAME import contact_seller_api
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 import Main
 from web_apis.Create_User import *
+from extras.Random_Models import *
 
 
 class TestContactSeller(unittest.TestCase):
@@ -111,6 +112,25 @@ class TestContactSeller(unittest.TestCase):
                            missing_token['error'],
                            missing_receiverId['error']]
         self.assertTrue(are_two_lists_same(response.keys(), errors_expected))
+
+    def test_invalid_sender(self):
+        correct_input = {
+            "senderId": self.user_buyer['userId'],
+            "listingId": self.listing['listingId'],
+            "authToken": self.user_buyer['authToken'] + "a",
+            "message": "Hey, I'm interested in your property.",
+            "phone": self.user_buyer['phone1'],
+            "email": self.user_buyer['email'],
+            "receiverId": self.user_seller['userId']
+        }
+
+        response, response_status = \
+            get_contact_seller_api_response(correct_input)
+        self.assertEquals(response_status, unauthorized_access)
+        self.assertTrue(are_two_lists_same(response.keys(),
+                                           [not_authorized["error"]]))
+
+
 
     def tearDown(self):
         self.testbed.deactivate()

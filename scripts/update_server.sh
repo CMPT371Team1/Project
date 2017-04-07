@@ -12,5 +12,6 @@ if [[ "${BUILD_TYPE}" != "deployment" ]]; then
   openssl aes-256-cbc -K $encrypted_cb585f974371_key -iv $encrypted_cb585f974371_iv -in keys/server_pass.enc -out server_pass -d
   export SERVER_PASS=`cat server_pass`
 
+  sshpass -p "${SERVER_PASS}" scp -r server-gae/test/htmlcov gaa721@cmpt371g1.usask.ca:~/CoverageResult
   sshpass -p "${SERVER_PASS}" ssh gaa721@cmpt371g1.usask.ca "${SCRIPT}"
 fi

@@ -19,13 +19,13 @@ page-browse {
 
     ion-list{
         margin-bottom: 0 !important;
-    }
 
-    ion-item{
-        padding-left: 0 !important;
+        ion-item{
+            padding-left: 0 !important;
 
-        .item-inner{
-            padding-right: 0 !important;
+            .item-inner{
+                padding-right: 0 !important;
+            }
         }
     }
 
@@ -33,7 +33,9 @@ page-browse {
         margin: 0 !important;
         @include aspect-ratio(16, 9);
 
-        ion-img{
+        div.image{
+            background-position: center;
+            background-size: 100% !important;
             position: absolute !important;
             height: 100% !important;
             width: 100% !important;

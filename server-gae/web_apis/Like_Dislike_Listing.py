@@ -1,8 +1,10 @@
 import os
 from extras.Utils import *
+from extras.Check_Invalid import *
 from models.Favorite import Favorite
 from models.Listing import Listing
 from models.User import User
+
 import sys
 from API_NAME import like_listing_api
 from extras.Required_Fields import check_required_valid
@@ -24,14 +26,6 @@ class LikeDislikeListing(webapp2.RequestHandler):
                     update the liked field if it exists.
         @return-api: nothing.
     """
-
-    def options(self, *args, **kwargs):
-        setup_api_options(self)
-
-    def get(self):
-
-        self.render_template('../webpages/Like_dislike_listing.html')
-
     def post(self):
         setup_post(self.response)
 
@@ -83,9 +77,6 @@ class LikeDislikeListing(webapp2.RequestHandler):
                     write_error_to_response(self.response, error,
                                             processing_failed)
                     return
-
-                # if everything is correct, change the liked field to be true
-                favorite.liked = True
 
             else:
                 # user want to unlike the list

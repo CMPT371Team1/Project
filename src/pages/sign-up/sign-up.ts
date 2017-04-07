@@ -14,9 +14,8 @@ let assert = require('assert-plus');
     providers: [KasperService]
 })
 export class SignUpPage {
-    @ViewChild(Slides) slides: Slides;
-
     private _provinces: Province[];
+    step: number;
 
     // Form validation
     signUpStep1: FormGroup;
@@ -35,6 +34,8 @@ export class SignUpPage {
                 public toastCtrl: ToastController,
                 public kasperService: KasperService,
                 public platform: Platform) {
+
+        this.step = 1;
 
         this._provinces = Province.asArray;
 
@@ -57,11 +58,6 @@ export class SignUpPage {
         this.signUpStep3 = formBuilder.group({
             province: ['', Validators.compose([Validators.required])],
             city: ['', Validators.compose([])],
-        });
-
-        // Disable swiping (has to be done after page load)
-        platform.ready().then(() => {
-            this.slides.lockSwipes(true);
         });
     }
 
@@ -115,8 +111,7 @@ export class SignUpPage {
             // changing to another tab) will bring the user back to the SignInPage page.
             this.navCtrl.parent.select(0);
         }, error => {
-            this._logger.error("There was an error registering: ");
-            this._logger.error(JSON.stringify(error));
+            this.kasperService.handleError("signUp", error.json());
         });
     }
 
@@ -125,13 +120,12 @@ export class SignUpPage {
      *
      * @pre-cond    the current step passed validation
      * @pre-cond    there is a next step
+     * @post-cond   step is incremented or we register if we are on the last step
      */
     nextStep(): void{
         if(this.confirmStep()){
-            if(this.slides.getActiveIndex() != 2) {
-                this.slides.lockSwipes(false);
-                this.slides.slideTo(this.slides.getActiveIndex() + 1);
-                this.slides.lockSwipes(true);
+            if(this.step != 3) {
+                this.step++;
             } else {
                 this.doRegister();
             }
@@ -149,12 +143,11 @@ export class SignUpPage {
      * Move back to the previous step.
      *
      * @pre-cond    there is a previous step
+     * @post-cond   step is decremented
      */
     previousStep(): void{
-        if(this.slides.getActiveIndex() != 0) {
-            this.slides.lockSwipes(false);
-            this.slides.slideTo(this.slides.getActiveIndex() - 1);
-            this.slides.lockSwipes(true);
+        if(this.step != 1) {
+            this.step--;
         }
     }
 
@@ -166,31 +159,28 @@ export class SignUpPage {
      * @pre-cond    the current step index exists
      */
     confirmStep(): boolean {
-        switch (this.slides.getActiveIndex()) {
-            case 0:
+        switch (this.step) {
+            case 1:
                 return (this.signUpStep1.valid &&
                 this.signUpStep1.value.password == this.signUpStep1.value.confirmPassword);
-            case 1:
-                return this.signUpStep2.valid;
             case 2:
+                return this.signUpStep2.valid;
+            case 3:
                 return this.signUpStep3.valid;
             default:
                 assert(false, "Tried to confirm step that did not exist.");
         }
     }
 
-    /////////////////////////////
-    // Form Validation Helpers
     // The following functions update variables that toggle the display of error messages
-
     attemptAll(){
-        if(this.slides.getActiveIndex() == 0) {
+        if(this.step == 1) {
             this.attemptEmail();
             this.attemptPassword();
             this.attemptConfirmPassword();
-        } else if (this.slides.getActiveIndex() == 1){
+        } else if (this.step == 2){
             this.attemptFirstName();
-        } else if (this.slides.getActiveIndex() == 2){
+        } else if (this.step == 3){
 
         }
     }

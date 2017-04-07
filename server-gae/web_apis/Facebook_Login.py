@@ -1,5 +1,6 @@
 import os
 from extras.Utils import *
+from extras.Check_Invalid import *
 from models.FacebookUser import FacebookUser
 from models.User import User
 import sys
@@ -35,6 +36,13 @@ class FacebookLogin(BaseHandler):
         # find the correct user with userId
         fb_query = FacebookUser.query().filter(
             FacebookUser.fb_id == int(values["fbId"])).fetch(keys_only=True)
+
+        if len(fb_query) == 0:
+            write_error_to_response(self.response, {
+                invalid_fb_id["error"]: "Fb ID not found"
+            }, invalid_fb_id["status"])
+            return
+
         assert len(fb_query) == 1
         fb_entry_id = fb_query[0].integer_id()
         fb_entry = FacebookUser.get_by_id(fb_entry_id)

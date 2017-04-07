@@ -1,5 +1,6 @@
 import sys
 from extras.Utils import *
+from extras.Check_Invalid import *
 from models.Favorite import Favorite
 from models.Listing import Listing
 from models.User import User
@@ -18,12 +19,9 @@ class GetFavourites(webapp2.RequestHandler):
                    User with provided userId should be present in the database.
                    authToken should be valid for given userId.
         @post-cond: Nothing
-        @return-api: All the listing liked by the user with userId are returned.
+        @return-api: All the listings liked by the user with userId are
+                     returned.
     """
-
-    def options(self, *args, **kwargs):
-        setup_api_options(self)
-
     def post(self):
         setup_post(self.response)
         valid, values = \
@@ -37,13 +35,17 @@ class GetFavourites(webapp2.RequestHandler):
                                    Favorite.liked == True).fetch()
 
         returned_array = []
+        count_listings = 0
+        published_favourites = False
         for favorite in favorites:
-            fav_listingId = favorite.listingId
-            listing = Listing.get_by_id(fav_listingId)
+            fav_listing_id = favorite.listingId
+            listing = Listing.get_by_id(fav_listing_id)
             assert listing is not None
             if listing.isPublished:
+                published_favourites = True
+                count_listings += 1
                 template_values = {
-                    'listingId': fav_listingId,
+                    'listingId': fav_listing_id,
                     'userId': listing.userId,
                     'bedrooms': listing.bedrooms,
                     'squareFeet': listing.squareFeet,
@@ -61,5 +63,13 @@ class GetFavourites(webapp2.RequestHandler):
                     'thumbnailImageIndex': listing.thumbnailImageIndex
                 }
                 returned_array.append(template_values)
+            assert (favorites is not None)
 
+        assert (len(returned_array) == count_listings)
+        # For the following two asserts, If A then B <==> !A or B
+        assert (not (len(returned_array) == 0) or (not published_favourites))
+        assert (not (len(returned_array) > 0) or published_favourites)
+        assert valid
+        # returned_array is either [] or contains as many elements are there
+        # are published listings in favourites.
         write_success_to_response(self.response, {"listings": returned_array})

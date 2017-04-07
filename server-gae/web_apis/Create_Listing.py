@@ -1,5 +1,6 @@
 from models.Listing import Listing
 from models.User import User
+from extras.Check_Invalid import *
 import sys
 import os
 from extras.Utils import *
@@ -58,12 +59,6 @@ class CreateListing(webapp2.RequestHandler):
         errors, values = keys_missing(error_keys, self.request.POST)
         if len(errors) != 0:
             write_error_to_response(self.response, errors,
-                                    missing_invalid_parameter)
-            return
-
-        invalid = key_validation(values)
-        if len(invalid) != 0:
-            write_error_to_response(self.response, invalid,
                                     missing_invalid_parameter)
             return
 

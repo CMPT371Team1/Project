@@ -4,6 +4,7 @@ import {StatusBar, Splashscreen, SQLite} from "ionic-native";
 import {KasperConfig} from "./kasper-config";
 import {Logger} from "angular2-logger/core";
 import {MainPage} from "../pages/main/main";
+let assert = require('assert-plus');
 
 @Component({
     templateUrl: 'app.html'
@@ -13,7 +14,7 @@ export class MyApp {
 
     constructor(platform: Platform,
                 private _logger: Logger) {
-        
+
         platform.ready().then(() => {
             let db = new SQLite();
 
@@ -24,7 +25,7 @@ export class MyApp {
                 this._logger.error(JSON.stringify(error));
             });
         });
-        
+
         StatusBar.styleDefault();
         Splashscreen.hide();
     }
@@ -32,9 +33,12 @@ export class MyApp {
     /**
      * Creates the table containing the user's session info.
      *
+     * @pre-cond    db is not null
      * @param db  an open SQLite connection
      */
     private createLoginTable(db: SQLite): void {
+        assert(db, "db can not be null");
+
         db.executeSql(
             "CREATE TABLE IF NOT EXISTS session(" +
             "userId       INT PRIMARY KEY, " +

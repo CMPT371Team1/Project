@@ -13,6 +13,7 @@
         <ion-item>
             <ion-label stacked>Province</ion-label>
             <ion-select [(ngModel)]="province" id="flProv">
+                <ion-option value = "null" >None</ion-option>
                 <ion-option *ngFor="let province of _provinces" value="{{ province.abbr }}">{{ province.name }}</ion-option>
             </ion-select>
         </ion-item>
@@ -33,8 +34,8 @@
             <ion-label stacked>Square Feet</ion-label>
             <ion-range [(ngModel)]="squareFeet" id="flSqft" dualKnobs="true" min="{{_squareFeetMin}}" max="{{_squareFeetMax}}" pin="true">
                 <ion-label *ngIf="squareFeet?.lower == 100" range-left>No Min</ion-label>
-                <ion-label *ngIf="squareFeet?.lower != 100" range-left>100</ion-label>
-                <ion-label *ngIf="squareFeet?.upper != 10000" range-right>10000</ion-label>
+                <ion-label *ngIf="squareFeet?.lower != 100" range-left>100&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</ion-label>
+                <ion-label *ngIf="squareFeet?.upper != 10000" range-right>&nbsp;&nbsp;&nbsp;10000</ion-label>
                 <ion-label *ngIf="squareFeet?.upper == 10000" range-right>No Max</ion-label>
             </ion-range>
         </ion-item>
@@ -44,8 +45,8 @@
             <ion-label stacked>Bedrooms</ion-label>
             <ion-range [(ngModel)]="bedrooms" lower="1" upper="4" id="flBed" dualKnobs="true" step="1" snaps="true" min="{{_bedroomsMin}}" max="{{_bedroomsMax}}" pin="true">
                 <ion-label *ngIf="bedrooms?.lower == 1" range-left>No Min</ion-label>
-                <ion-label *ngIf="bedrooms?.lower != 1" range-left>1</ion-label>
-                <ion-label *ngIf="bedrooms?.upper != 10" range-right>10</ion-label>
+                <ion-label *ngIf="bedrooms?.lower != 1" range-left>1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</ion-label>
+                <ion-label *ngIf="bedrooms?.upper != 10" range-right>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10</ion-label>
                 <ion-label *ngIf="bedrooms?.upper == 10" range-right>No Max</ion-label>
             </ion-range>
         </ion-item>
@@ -55,16 +56,16 @@
             <ion-label stacked>Bathrooms</ion-label>
             <ion-range [(ngModel)]="bathrooms" id="flBath" dualKnobs="true" step="0.5" snaps="true" min="{{_bathroomsMin}}" max="{{_bathroomsMax}}" pin="true">
                 <ion-label *ngIf="bathrooms?.lower == 1" range-left>No Min</ion-label>
-                <ion-label *ngIf="bathrooms?.lower != 1" range-left>1</ion-label>
-                <ion-label *ngIf="bathrooms?.upper != 10" range-right>10</ion-label>
+                <ion-label *ngIf="bathrooms?.lower != 1" range-left>1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</ion-label>
+                <ion-label *ngIf="bathrooms?.upper != 10" range-right>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10</ion-label>
                 <ion-label *ngIf="bathrooms?.upper == 10" range-right>No Max</ion-label>
             </ion-range>
         </ion-item>
 
         <!--Apply the Filter-->
         <ion-item>
-            <button ion-button block (click)="applyFilter()" id="flApply">Apply Filter</button>
-            <button ion-button block (click)="cancel()" id="flCancel">Cancel</button>
+            <button ion-button item-left="" (click)="cancel()" id="flCancel">Cancel</button>
+            <button ion-button item-right="" (click)="applyFilter()" id="flApply">Apply Filter</button>
         </ion-item>
 
     </ion-list>

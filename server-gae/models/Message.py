@@ -3,9 +3,7 @@ from google.appengine.ext import ndb
 
 
 class Message(ndb.Model):
-    """
-    Models an individual Guest book entry with content and date.
-    """
+    """This Message class contains the fields associated with a message."""
     messageId = ndb.IntegerProperty(required=True, default=0)
     listingId = ndb.IntegerProperty(required=True)
     senderId = ndb.IntegerProperty(required=True)
